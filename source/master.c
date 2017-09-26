@@ -34,9 +34,9 @@ void fd_handle(sme_mech_t *mech, sme_fd_t *fde, void *data);
 void fd_handle_epoll(sme_mech_t *mech, sme_fd_t *fde, void *data);
 
 wait_mech valid_wait_mech[4] = {{"sequential", 0},
-	{"select", 1},
-	{"poll", 2},
-	{"epoll", 3}};
+								{"select", 1},
+								{"poll", 2},
+								{"epoll", 3}};
 
 void str_reverse(char *str) {
 	int var = 0, i = 0, j = 0;	
@@ -238,7 +238,7 @@ int exec_worker_spawn(sme_mech_t *m,
 			select_mech_add_fd(m, pipe_fd[0], 0, fd_handle, 0);
 		}
 		else if (flag == 2) {
-			/* Select mechanism selected */
+			/* Epoll mechanism selected */
 			epoll_mech_add_fd(m, pipe_fd[0], 0, fd_handle_epoll, 0);
 		}
 	}

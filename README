@@ -18,5 +18,5 @@ MECHANISM -x 2 -n 12
 	Run : ./worker -x 2 -n 3
 
 NOTE:
-Only sequential and select have been implemented.
-A doubly linked list library has been used.
+The epoll mechanism is not fully functional and causes wrong result
+
