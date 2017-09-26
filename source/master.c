@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <getopt.h>
 #include "../sme/sme_select.h"
+#include "../sme/sme_epoll.h"
 
 #define SUCCESS 0
 #define FAILURE 1
@@ -30,6 +31,7 @@ typedef struct wait_mech
 
 void pid_handle(sme_mech_t *mech, sme_proc_t *proce, void *data);
 void fd_handle(sme_mech_t *mech, sme_fd_t *fde, void *data);
+void fd_handle_epoll(sme_mech_t *mech, sme_fd_t *fde, void *data);
 
 wait_mech valid_wait_mech[4] = {{"sequential", 0},
 	{"select", 1},
@@ -188,7 +190,7 @@ typedef struct seq_cb_data {
 	int n;
 } seq_cb_data_t;
 
-int exec_worker_sequential_or_select(sme_mech_t *m,
+int exec_worker_spawn(sme_mech_t *m,
 		const char *worker_path,
 		int x,
 		int n,
@@ -231,9 +233,13 @@ int exec_worker_sequential_or_select(sme_mech_t *m,
 			*fd = pipe_fd[0];
 			select_mech_add_proc(m, pid, 0, pid_handle, fd);
 		}
-		else {
+		else if(flag == 1) {
 			/* Select mechanism selected */
 			select_mech_add_fd(m, pipe_fd[0], 0, fd_handle, 0);
+		}
+		else if (flag == 2) {
+			/* Select mechanism selected */
+			epoll_mech_add_fd(m, pipe_fd[0], 0, fd_handle_epoll, 0);
 		}
 	}
 
@@ -257,7 +263,7 @@ void pid_handle(sme_mech_t *mech, sme_proc_t *proce, void *data)
 	if ((g_active_workers < g_num_workers)
 			&& (g_current_n <= g_in_n)) {
 
-		exec_worker_sequential_or_select(mech,
+		exec_worker_spawn(mech,
 				g_worker_path,
 				g_in_x, g_current_n, 0);
 	}
@@ -277,9 +283,52 @@ void fd_handle(sme_mech_t *m, sme_fd_t *fde, void *data)
 	if ((g_active_workers < g_num_workers)
 			&& (g_current_n <= g_in_n)) {
 
-		exec_worker_sequential_or_select(m, g_worker_path,
+		exec_worker_spawn(m, g_worker_path,
 				g_in_x, g_current_n, 1);
 	}
+}
+
+void fd_handle_epoll(sme_mech_t *m, sme_fd_t *fde, void *data)
+{
+	float worker_data = 0;
+
+	read(fde->fd, &worker_data, sizeof(worker_data));
+	printf("Received data from worker : %d : %0.9f\n",
+			fde->fd, worker_data);
+	g_summation += worker_data;
+
+	g_active_workers--;
+
+	if ((g_active_workers < g_num_workers)
+			&& (g_current_n <= g_in_n)) {
+
+		exec_worker_spawn(m, g_worker_path,
+				g_in_x, g_current_n, 2);
+	}
+}
+
+float epoll_mech(char *worker_path,
+		int num_workers,
+		int x,
+		int n)
+{
+	int k = 1;
+	sme_mech_t *m = NULL;
+	m = epoll_mech_init();
+
+	/* Launch initial num of workers */
+	do {
+		/* Implemented epoll mechanism by monitoring fd's */
+		exec_worker_spawn(m, g_worker_path,
+				x, k, 2);
+		k++;
+	} while((k <= n) && (k <= num_workers));
+
+	epoll_mech_loop_wait(m);
+
+	g_summation += 1;
+
+	return 0;
 }
 
 float select_mech(char *worker_path,
@@ -294,7 +343,7 @@ float select_mech(char *worker_path,
 	/* Launch initial num of workers */
 	do {
 		/* Implemented select mechanism by monitoring fd's */
-		exec_worker_sequential_or_select(m, g_worker_path,
+		exec_worker_spawn(m, g_worker_path,
 				x, k, 1);
 		k++;
 	} while((k <= n) && (k <= num_workers));
@@ -321,7 +370,7 @@ float sequential_mech(char *worker_path,
 		 * Implemented sequential using select mechanism itself by
 		 * monitoring pid instead of fd's
 		 */
-		exec_worker_sequential_or_select(m, g_worker_path,
+		exec_worker_spawn(m, g_worker_path,
 				x, k, 0);
 		k++;
 	} while((k <= n) && (k <= num_workers));
@@ -374,6 +423,12 @@ int main(int argc, char** argv) {
 					num_workers,
 					x, n);
 			break;
+		case 3:
+			epoll_mech(worker_path,
+					num_workers,
+					x, n);
+			break;
+
 		default:
 			printf("Unsupported mechanism\n");
 
