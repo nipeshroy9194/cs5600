@@ -1,0 +1,22 @@
+README : For HW2
+Author : Nipesh Roy <roy.nip@husky.neu.edu>
+
+Description : Master-Worker multi process problem
+
+How to Execute the code:
+1.To create master and worker:
+	Run : make
+
+2.If object files are already present:
+	Run : make clean
+
+3. Example to run master
+$ 	Run: ./master --worker_path ./worker --num_workers 5 --wait_mechanism
+MECHANISM -x 2 -n 12
+
+4. To test individual worker
+	Run : ./worker -x 2 -n 3
+
+NOTE:
+Only sequential and select have been implemented.
+A doubly linked list library has been used.
