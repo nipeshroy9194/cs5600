@@ -254,8 +254,7 @@ void pid_handle(sme_mech_t *mech, sme_proc_t *proce, void *data)
 
 	read(*fd, &worker_data, sizeof(worker_data));
 
-	printf("Received data from worker : %d : %0.9f\n",
-			proce->pid, worker_data);
+	printf("Received data : %0.9f\n", worker_data);
 	g_summation += worker_data;
 
 	g_active_workers--;
@@ -274,8 +273,7 @@ void fd_handle(sme_mech_t *m, sme_fd_t *fde, void *data)
 	float worker_data = 0;
 
 	read(fde->fd, &worker_data, sizeof(worker_data));
-	printf("Received data from worker : %d : %0.9f\n",
-			fde->fd, worker_data);
+	printf("Received data : %0.9f\n", worker_data);
 	g_summation += worker_data;
 
 	g_active_workers--;
@@ -293,8 +291,7 @@ void fd_handle_epoll(sme_mech_t *m, sme_fd_t *fde, void *data)
 	float worker_data = 0;
 
 	read(fde->fd, &worker_data, sizeof(worker_data));
-	printf("Received data from worker : %d : %0.9f\n",
-			fde->fd, worker_data);
+	printf("Received data : %0.9f\n", worker_data);
 	g_summation += worker_data;
 
 	g_active_workers--;
@@ -404,9 +401,6 @@ int main(int argc, char** argv) {
 			mech_id = valid_wait_mech[no].mechanism_id;
 			printf("Mechanism selected : %s\n",
 					valid_wait_mech[no].mechanism_name);
-			printf("Num of workers %d\n", num_workers);
-			printf("x : %d\n", x);
-			printf("n : %d\n", n);
 			break;
 		}
 		no++;

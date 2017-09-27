@@ -119,6 +119,6 @@ int epoll_mech_loop_wait(sme_mech_t *mech)
         }
     }
 
-    printf("No more events. Exiting...\n");
+    //printf("No more events. Exiting...\n");
     return 0;
 }
