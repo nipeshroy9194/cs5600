@@ -5,9 +5,9 @@
 #include <string.h>
 
 bool validate_and_get_args(int argc,
-						   char **argv,
-						   int *x,
-						   int *n)
+		char **argv,
+		int *x,
+		int *n)
 {
 	int ch;
 
@@ -19,16 +19,16 @@ bool validate_and_get_args(int argc,
 	while((ch = getopt(argc, argv, "x:n:")) != -1)
 	{
 		switch(ch) {
-		case 'x':
-			*x = atoi(optarg);
-			break;
-		case 'n':
-			*n = atoi(optarg);
-			break;
-		default:
-			if (n < 0)
-				printf("Invalid arguments\n");
-			return false;
+			case 'x':
+				*x = atoi(optarg);
+				break;
+			case 'n':
+				*n = atoi(optarg);
+				break;
+			default:
+				if (n < 0)
+					printf("Invalid arguments\n");
+				return false;
 		}
 	}
 

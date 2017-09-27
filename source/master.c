@@ -34,9 +34,9 @@ void fd_handle(sme_mech_t *mech, sme_fd_t *fde, void *data);
 void fd_handle_epoll(sme_mech_t *mech, sme_fd_t *fde, void *data);
 
 wait_mech valid_wait_mech[4] = {{"sequential", 0},
-								{"select", 1},
-								{"poll", 2},
-								{"epoll", 3}};
+	{"select", 1},
+	{"poll", 2},
+	{"epoll", 3}};
 
 void str_reverse(char *str) {
 	int var = 0, i = 0, j = 0;	
