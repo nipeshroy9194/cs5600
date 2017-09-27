@@ -9,25 +9,13 @@
 #include "list.h"
 
 typedef struct e_poll_data e_poll_data_t;
-#define INVALID_MAXFD -1
 
 struct e_poll_data {
     sme_mech_t *m;
     /* epoll create fd */
     int epoll_fd;
-	int max_fd;
 };
 
-void calc_maxfd_epoll(e_poll_data_t *sa) {
-
-    sme_fd_t *fde;
-    sa->max_fd = 0;
-
-    for (fde = sa->m->fd_events; fde; fde = fde->next) {
-        if (sa->max_fd < fde->fd)
-            sa->max_fd = fde->fd;
-    }
-}
 
 sme_mech_t *epoll_mech_init()
 {
@@ -52,7 +40,6 @@ sme_mech_t *epoll_mech_init()
 
     d->m = mech;
 	d->epoll_fd = epoll_fd;
-    d->max_fd = INVALID_MAXFD;
 
     return mech;
 }
@@ -81,83 +68,39 @@ sme_fd_t *epoll_mech_add_fd(sme_mech_t *mech,
                     ev,
                     cb,
                     cb_data);
-    if (!fde)
-        return NULL;
-    
-    if ((ed->max_fd != INVALID_MAXFD)
-        && (fde->fd > ed->max_fd)) {
-        ed->max_fd = fde->fd;
-    }
-
     return fde;
 }
 
 bool epoll_mech_loop_once(sme_mech_t *mech)
 {
-    int sret;
-    int isset;//ret = -1;
+    int eret;
+    int tv = 5000; // 5 seconds
     sme_fd_t *fde;
-    fd_set r_fds, w_fds;
-	struct epoll_event event;
-	struct epoll_event *events = NULL;
+	struct epoll_event events;
     
-    FD_ZERO(&r_fds);
-    FD_ZERO(&w_fds);
 
-    e_poll_data_t *sd = mech->priv_data;
-    if (sd->max_fd == INVALID_MAXFD) {
-        calc_maxfd_epoll(sd);
-    }
-    for (fde = sd->m->fd_events; fde; fde = fde->next) {
-        if (fde->ev == SME_READ) {
-            FD_SET(fde->fd, &r_fds);
-        }
+    e_poll_data_t *ed = mech->priv_data;
 
-        if (fde->ev == SME_WRITE) {
-            FD_SET(fde->fd, &w_fds);
-        }
-    }
+    eret = epoll_wait(ed->epoll_fd, &events, 1, tv);
 
-	/* Buffer where events are returned */
-	events = calloc (64, sizeof(event));
-	do {
-        sret = epoll_wait(sd->epoll_fd, events, 64, -1);
-    } while (0 >= sret && EINTR == errno);
-
-    if (sret == -1) {
+    if (eret == -1) {
         printf("epoll error :%d\n", errno);
         return false;
     }
-    
-    if (sret > 0) {
-        /* FD_ISSET(0, &rfds) will be true. */
-        isset = 0;
-        for (fde = sd->m->fd_events; fde; fde = fde->next) {
-            if ((FD_ISSET(fde->fd, &r_fds))
-                 && (fde->ev == SME_READ)) {
-                isset = 1;
-            }
 
-            if ((FD_ISSET(fde->fd, &w_fds))
-                 && (fde->ev == SME_WRITE)) {
-                isset = 1;;
-            }
+    if (eret > 0) {
+        for (fde = ed->m->fd_events; fde; fde = fde->next) {
+            if (events.data.fd == fde->fd) {
 
-            if (isset) {
+                LIST_REMOVE(ed->m->fd_events, fde);
+	            epoll_ctl(ed->epoll_fd, EPOLL_CTL_DEL, fde->fd, NULL);
                 /*
-                 * Remove fde from fd_events.
-                 * Decrement num of alive fd events
+                 * Trigger the callback
                  */
-                LIST_REMOVE(sd->m->fd_events, fde);
-				sd->max_fd = INVALID_MAXFD;
-				/*
-				 * Trigger the callback
-                 */
-                fde->cb(sd->m, fde, fde->cb_data);
+                fde->cb(ed->m, fde, fde->cb_data);
                 break;
             }
         }
-        return true;
     }
     return true;
 }

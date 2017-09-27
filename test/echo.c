@@ -27,7 +27,6 @@ int main()
     int pid;// *fd = NULL;
     int p_fd[2];
     int ret;
-	int i = 0;
 	//char *arg[6];
     sme_mech_t *m = NULL;
     m = epoll_mech_init();
@@ -42,31 +41,28 @@ int main()
 	arg[4] = "3";
 	arg[5] = NULL;*/
 
-	do {
-		pipe2(p_fd, O_NONBLOCK);
+    pipe2(p_fd, O_NONBLOCK);
 
-		pid = fork();
-		if(pid < 0) {
-			printf("fork failed");
-		}
-		else if (pid == 0) {
-			close(p_fd[0]);
-			dup2(p_fd[1], 1);
-			//printf("In child writing on fd : %d\n", p_fd[1]);
-			//execv(".", arg);
-			ret = write(p_fd[1], "hello", 5);
-			if (ret < 0)
-				write(p_fd[1], "write failed", 10);
-			_exit(EXIT_SUCCESS);
-		}
-		else {
-			//printf("In parent\n");
-			close(p_fd[1]);
-			//select_mech_add_proc(m, pid, 0, pid_handle, fd);
-			epoll_mech_add_fd(m, p_fd[0], 0, fd_handle, 0);
-		}
-		i++;
-	}while (i != 5);
+    pid = fork();
+    if(pid < 0) {
+        printf("fork failed");
+    }
+    else if (pid == 0) {
+        close(p_fd[0]);
+        dup2(p_fd[1], 1);
+        //printf("In child writing on fd : %d\n", p_fd[1]);
+        //execv(".", arg);
+        ret = write(p_fd[1], "hello", 5);
+        if (ret < 0)
+            write(p_fd[1], "write failed", 10);
+        _exit(EXIT_SUCCESS);
+    }
+    else {
+        //printf("In parent\n");
+        close(p_fd[1]);
+        //select_mech_add_proc(m, pid, 0, pid_handle, fd);
+        epoll_mech_add_fd(m, p_fd[0], 0, fd_handle, 0);
+    }
 
     epoll_mech_loop_wait(m);
     return 0;

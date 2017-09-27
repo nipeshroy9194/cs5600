@@ -25,16 +25,18 @@ do { \
  */
 #define LIST_REMOVE(head, del_el) \
 do { \
-	typeof(head) tmp;\
+	typeof(head) tmp; \
+	typeof(head) prev; \
 	if ((del_el) == (head)) { \
 		(head) = (del_el)->next; \
 	} else { \
 		tmp = head; \
-		while ((tmp->next) && (tmp->next != del_el)) { \
+		while (tmp && (tmp != del_el)) { \
+            prev = tmp; \
 			tmp = tmp->next; \
 		} \
-		if (tmp->next) {\
-			tmp->next = del_el->next; \
+		if (tmp) { \
+			prev->next = tmp->next; \
 		} \
 	} \
 } while (0)
