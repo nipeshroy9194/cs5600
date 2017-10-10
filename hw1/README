@@ -1,0 +1,15 @@
+README : For HW1
+Author : Nipesh Roy <roy.nip@husky.neu.edu>
+
+Description : Checkpointing an restarting a process
+
+How to Execute the code:
+1.To create shared library libckpt.so and other object files
+	Run : make
+2.If object files are already present:
+	Run : make clean
+3.To checkpoint the process
+	Run : LD_PRELOAD=/path/to/libckpt.so ./hello.o
+	This will create a myckpt checkpoint file
+4.To restart the process do
+	Run : ./myrestart.o myckpt
