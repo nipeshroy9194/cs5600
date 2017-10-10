@@ -1,0 +1,11 @@
+CS5600
+
+Repository which contains code related to the assignments given in the CS5600 Fall 2017.
+
+Lists of Assignment and directory related to it.
+
+Sr No.                             Name                                            Assignment
+  1.                 Checkpoint and Restart a Process                                 hw1
+  2.                 Master-worker communication to compute e^x                       hw2
+                     using sequential, select, epoll mechanism
+  3.                 Implement malloc library                                         hw3
