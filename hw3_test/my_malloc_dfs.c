@@ -299,7 +299,7 @@ int main()
 		printLevelOrder(root);	
 	}
 	printf("\n\nALLOCATION 5");
-	my_malloc(2273741824);
+	my_malloc(2073741824);
 	printLevelOrder(root);
 	return 0;
 }
