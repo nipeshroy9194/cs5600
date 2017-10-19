@@ -8,26 +8,18 @@ void *mymalloc(size_t size)
     void *mem = NULL;
 
     if (0 >= size) {
-        goto null_return;
+        goto out;
     }
     debug("Size requested %zu", size);
 
+    /* TODO round-off size of the next higher power of 2*/
     //check if size can be satisfied
     mem = _alloc_memory(size);
     if (NULL != mem) {
         debug("mem %zu allocated", size);
-        goto mem_return;
+        goto out;
     }
 
-    //else request memory from kernel
-    mem = _request_from_kernel(size);
-    if (NULL == mem) {
-        debug("requesting from kernel");
-        goto null_return;
-    }
-
-mem_return:
+out:
     return mem;
-null_return:
-    return NULL;
 }

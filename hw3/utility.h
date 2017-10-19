@@ -4,7 +4,7 @@
 
 //Debug macro
 #ifndef NDEBUG
-    #define debug(fmt, ...) printf(fmt"\n", ##__VA_ARGS__)
+    #define debug(fmt, ...) printf(fmt" f(): %s\n", ##__VA_ARGS__, __func__)
 #else
     #define debug(fmt, ...)
 #endif

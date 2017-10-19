@@ -6,12 +6,12 @@
 typedef struct BUDDY_NODE{
 	void *start;
     size_t size;
-	struct BUDDY_NODE *next, *prev;
+	struct BUDDY_NODE *left, *right;
 	uint8_t free;
 }buddy_node_t;
 
 void *_alloc_memory(size_t size);
 
-void *_request_from_kernel(size_t size);
+void _reclaim_memory(void *mem);
 
 #endif
