@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 //Debug macro
-#ifndef NDEBUG
+#ifdef DEBUG
     #define debug(fmt, ...) printf(fmt" f(): %s\n", ##__VA_ARGS__, __func__)
 #else
     #define debug(fmt, ...)

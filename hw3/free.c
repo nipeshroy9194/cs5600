@@ -2,6 +2,7 @@
 #include "buddy.h"
 #include "utility.h"
 
+//void free(void *ptr)
 void myfree(void *ptr)
 {
     if (NULL == ptr)

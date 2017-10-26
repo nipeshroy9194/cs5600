@@ -1,9 +1,11 @@
 #include "mymalloc.h"
 #include "buddy.h"
 #include "utility.h"
+#include <string.h>
 #include <errno.h>
 
-void *mymalloc(size_t size)
+//void *realloc(void *ptr, size_t size)
+void *myrealloc(void *ptr, size_t size)
 {
     void *mem = NULL;
 
@@ -11,17 +13,14 @@ void *mymalloc(size_t size)
         goto out;
     }
 
-	if (size < 8)
-		size = 8;
-
-    debug("Size requested %zu", size);
-
     /* TODO round-off size of the next higher power of 2*/
     /* check if size can be satisfied */
-    mem = _alloc_memory(size);
+    mem = mymalloc(size);
     if (NULL != mem) {
         debug("mem %zu allocated", size);
-        goto out;
+		memcpy(mem, ptr, sizeof(*ptr));
+		myfree(ptr);
+		goto out;
     }
 
 out:

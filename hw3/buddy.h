@@ -11,7 +11,6 @@ typedef struct BUDDY_NODE{
 }buddy_node_t;
 
 void *_alloc_memory(size_t size);
-
 void _reclaim_memory(void *mem);
 
 #endif

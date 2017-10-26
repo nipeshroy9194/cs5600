@@ -2,3 +2,24 @@ README : For HW2
 Author : Nipesh Roy <roy.nip@husky.neu.edu>
 
 Description : Implementation of the Malloc library
+
+How to Run:
+1. make
+2. export LD_LIBRARY_PATH=path_to_the_libmalloc.so
+3. ./driver which is a driver program which allocates memory.
+
+Highlights:
+1. Implements buddy allocation.
+2. Implements buddy using a Binary Tree.
+3. Can be easily extended to multiple threads if the metadata being
+allocated is dynamically allocated.
+
+TODO's:
+1. Application is single threaded & does not create threads and its arenas.
+2. Allocates memory of the metadata being stored statically
+3. Allocated maximum of 1MB of memory.
+4. Due to the above limitations cannot use printf() and other library
+calls which call malloc internally for buffer allocation as the
+allocation fail and the driver might crash.
+5. Does not implement malloc statistics.
+6. Implement malloc hooks.
