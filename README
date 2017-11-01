@@ -9,3 +9,4 @@ Sr No.                             Name                                         
   2.                 Master-worker communication to compute e^x                       hw2
                      using sequential, select, epoll mechanism
   3.                 Implement malloc library                                         hw3
+  4.                 Determine the approximate RAM of the system                      hw4
