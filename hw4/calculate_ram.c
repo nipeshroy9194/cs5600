@@ -1,3 +1,7 @@
+/**
+ * HW4 : Program to calculate RAM using memory thrashing
+ * Author : Nipesh Roy <roy.nip@husky.neu.edu>
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +19,18 @@ int main()
 	clock_t start;
 	double timeTaken;
 	long int GB = 1024 * 1024 * 1024;
+	FILE *fp = NULL;
+
+	ram_size = (CHUNK_ALLOCATED / (MB));
+	printf("\n CHUNK ALLOCATED : %ld\n", ram_size);
+	
+	fp = fopen("./output", "w");
+	if (fp == NULL) {
+		printf("\nUnable to create output file\n");	
+		goto error_out;
+	}
+
+	ram_size = 0;
 
 	for (i = 0 ; i < ARRAY_SIZE; i++)
 	{
@@ -29,12 +45,15 @@ int main()
 		{
 			memset(p[j], 0, CHUNK_ALLOCATED);
 		}
-		ram_size += CHUNK_ALLOCATED; 
+		ram_size += (CHUNK_ALLOCATED / (MB)); 
 		timeTaken = (double)(clock() - start)/CLOCKS_PER_SEC;
-		printf("%ldMB, %.8f \n", (ram_size / (1024 * 1024)), timeTaken);
+		fprintf(fp, "%ldMB, %.8f\n", ram_size, timeTaken);
+		fflush(fp);
 	}
 
 error_out:
-	printf("Ram Size is : %ldGB\n", (ram_size / (GB)));
+	fprintf(fp, "\nRam Size is : %ldGB\n", (ram_size / 1024));
+	fflush(fp);
+	fclose(fp);
 	return 0;
 }

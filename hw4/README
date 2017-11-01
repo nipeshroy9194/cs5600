@@ -1,0 +1,13 @@
+HW 04 : Determine RAM size using thrashing 
+
+Thrash the process by allocating memory continuously
+and calculating the time taken to allocate memory and
+writing all the memory allocated using memset
+
+The approximate size of the RAM is the last written line
+on in the file "output".
+
+After this the OOM killer should kill the process.
+
+OUTPUT:
+tailf -n 1 output to get approximate RAM of the machine.
