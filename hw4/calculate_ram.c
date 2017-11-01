@@ -3,8 +3,9 @@
 #include <string.h>
 #include <time.h>
 
-#define ARRAY_SIZE    4000
-#define ONE_MB_MEMORY 1024
+#define ARRAY_SIZE    	1000
+#define MB 				1024 * 1024
+#define CHUNK_ALLOCATED 40 * MB
 
 int main()
 {
@@ -13,34 +14,27 @@ int main()
 	long int ram_size = 0;
 	clock_t start;
 	double timeTaken;
+	long int GB = 1024 * 1024 * 1024;
 
 	for (i = 0 ; i < ARRAY_SIZE; i++)
 	{
 		start = clock();
-		p[i] = malloc(ONE_MB_MEMORY);
+		p[i] = malloc(CHUNK_ALLOCATED);
 		if (p[i] == NULL)
 		{
 			printf("\nNo more memory available");
 			goto error_out;
 		}
-		printf("\n");
 		for (j = 0; j < i; j++)
 		{
-			printf("%d ",j);
-			memset(p[j], 0, ONE_MB_MEMORY);
+			memset(p[j], 0, CHUNK_ALLOCATED);
 		}
-		printf("\n");
-		ram_size += ONE_MB_MEMORY; 
+		ram_size += CHUNK_ALLOCATED; 
 		timeTaken = (double)(clock() - start)/CLOCKS_PER_SEC;
-		printf("%ldMB, %.8f \n", (ram_size / 1024), timeTaken);
+		printf("%ldMB, %.8f \n", (ram_size / (1024 * 1024)), timeTaken);
 	}
 
 error_out:
-	printf("Ram Size is : %ldGB\n", (ram_size / (1024 * 1024)));
+	printf("Ram Size is : %ldGB\n", (ram_size / (GB)));
 	return 0;
-}
-
-int main()
-{
-
 }
