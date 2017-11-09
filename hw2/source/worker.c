@@ -38,8 +38,8 @@ int factorial(int n) {
   return n * factorial(n - 1);
 }
 
-int power(int x, int n) {
-  int answer = x;
+long int power(int x, int n) {
+  long int answer = x;
 
   if (n == 1)
     goto out;
@@ -54,8 +54,9 @@ out:
 }
 
 int main(int argc, char **argv) {
-  int x = -1, n = -1, numerator = 0, denominator = 0;
-  float answer = 0;
+  int x = -1, n = -1;
+  long int numerator = 0, denominator = 0;
+  double answer = 0;
   bool ret = false;
 
   ret = validate_and_get_args(argc, argv, &x, &n);
@@ -67,6 +68,6 @@ int main(int argc, char **argv) {
   numerator = power(x, n);
   denominator = factorial(n);
 
-  answer = (float)numerator / (float)denominator;
+  answer = (double)numerator / (double)denominator;
   write(1, &answer, sizeof(answer));
 }

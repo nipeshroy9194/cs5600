@@ -15,7 +15,7 @@
 #define SUCCESS 0
 #define FAILURE 1
 
-float g_summation = 0;
+double g_summation = 0;
 char g_worker_path[256] = {'\0'};
 int g_num_workers = 0;
 int g_active_workers = 0;
@@ -224,7 +224,7 @@ error_out:
 }
 
 void pid_handle(sme_mech_t *mech, sme_proc_t *proce, void *data) {
-  float worker_data;
+  double worker_data;
   int *fd = (int *)data;
 
   read(*fd, &worker_data, sizeof(worker_data));
@@ -241,7 +241,7 @@ void pid_handle(sme_mech_t *mech, sme_proc_t *proce, void *data) {
 }
 
 void fd_handle(sme_mech_t *m, sme_fd_t *fde, void *data) {
-  float worker_data = 0;
+  double worker_data = 0;
 
   read(fde->fd, &worker_data, sizeof(worker_data));
   printf("Received data : %0.9f\n", worker_data);
@@ -256,7 +256,7 @@ void fd_handle(sme_mech_t *m, sme_fd_t *fde, void *data) {
 }
 
 void fd_handle_epoll(sme_mech_t *m, sme_fd_t *fde, void *data) {
-  float worker_data = 0;
+  double worker_data = 0;
 
   read(fde->fd, &worker_data, sizeof(worker_data));
   printf("Received data : %0.9f\n", worker_data);
@@ -270,7 +270,7 @@ void fd_handle_epoll(sme_mech_t *m, sme_fd_t *fde, void *data) {
   }
 }
 
-float epoll_mech(char *worker_path, int num_workers, int x, int n) {
+double epoll_mech(char *worker_path, int num_workers, int x, int n) {
   int k = 1;
   sme_mech_t *m = NULL;
   m = epoll_mech_init();
@@ -289,7 +289,7 @@ float epoll_mech(char *worker_path, int num_workers, int x, int n) {
   return 0;
 }
 
-float select_mech(char *worker_path, int num_workers, int x, int n) {
+double select_mech(char *worker_path, int num_workers, int x, int n) {
   int k = 1;
   sme_mech_t *m = NULL;
   m = select_mech_init();
@@ -308,7 +308,7 @@ float select_mech(char *worker_path, int num_workers, int x, int n) {
   return 0;
 }
 
-float sequential_mech(char *worker_path, int num_workers, int x, int n) {
+double sequential_mech(char *worker_path, int num_workers, int x, int n) {
   int k = 1;
   sme_mech_t *m = NULL;
   m = select_mech_init();
