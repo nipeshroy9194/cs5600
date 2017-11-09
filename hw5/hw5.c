@@ -51,11 +51,12 @@ void calculate_cache_size(double plots[10][12])
 	}
 	
 	if (C1 == C2) {
-		printf("\nCache Size is approximately :%d", C1);
+		printf("\nCache Size is approximately :%d\n", C1);
 	}	
 	else {
-		printf("\nCache Size is between : %dKB to %dKB", C2, C1);
+		printf("\nCache Size is between : %dKB to %dKB\n", C2, C1);
 	}
+	printf("Check the file output.txt generated in the executable folder to see the time plots\n");
 }
 
 /* Considering the cache size is not greater than 8MB */
@@ -71,7 +72,7 @@ int main() {
 	FILE *fp = NULL;
 	double plots[10][12] = {0};
 
-	fp = fopen("output", "w");
+	fp = fopen("output.txt", "w");
 	if (fp == NULL) {
 		printf("Unable to open file output.txt\n");
 		exit(1);
