@@ -27,7 +27,8 @@ void calculate_cache_size(double plots[rerun][N], FILE *fp)
 		{
 			summation[i] += plots[k][i];
 		}
-		fprintf(fp, "Plot : %ldKB %f\n", (sizes[i]/KB), summation[i]);
+		printf("Plot : %dKB %f\n", (sizes[i]/KB), summation[i]);
+		fprintf(fp, "Plot : %dKB %f\n", (sizes[i]/KB), summation[i]);
 	}
 }
 
