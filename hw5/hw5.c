@@ -1,113 +1,74 @@
-#include <stdio.h>
-#include <time.h>
+#include <stdio.h> 
 #include <stdlib.h>
-#include <math.h>
+#include <time.h>
 
-void calculate_cache_size(double plots[10][12])
+#define KB 1024
+#define MB 1024 * KB
+
+int sizes[] = {1 * KB, 4 * KB, 8 * KB, 16 * KB,
+			   32 * KB, 64 * KB, 128 * KB, 256 * KB,
+    		   512 * KB, 1 * MB, 1.5 * MB, 2 * MB, 
+			   2.5 * MB, 3 * MB, 3.5 * MB, 4 * MB,
+			   8 * MB, 16 * MB};
+int N = (sizeof(sizes)/sizeof(int));
+int rerun = 5;
+
+/* Summate the plots */
+void calculate_cache_size(double plots[rerun][N], FILE *fp)
 {
 	int k = 0, i = 0;
-	int power_two = 12;
-	int N = 0;
 	int C1 = 0, C2 = 0;
-	double summation[11] = {0};
-	double max1 = 0;
-	double max2 = 0;
+	double summation[N];
 	
-	N = pow (2, power_two);
-	for (i = 0; i < 11; i++)
+	fprintf(fp, "\n");
+	for (i = 0; i < N; i++)
 	{
-		for (k = 0; k < 9; k++)
+		for (k = 0; k < rerun-1; k++)
 		{
 			summation[i] += plots[k][i];
 		}
-		if(max1 < summation[i])
-		{
-		 	max2 = max1;
-        	max1 = summation[i];
-		}
-		else if(max2 < summation[i]) {
-			max2 = summation[i];
-        }
-		N *= 2;
+		fprintf(fp, "Plot : %ldKB %f\n", (sizes[i]/KB), summation[i]);
 	}
-	
-	N = 0;
-	N = pow (2, power_two);
-	for (i = 0; i < 11; i++) {
-		if (max1 == max2 && max1 == summation[i]) {
-			C1 = C2 = (N/1024);
-		}
-		else {
-			if (max1 == summation[i])
-			{
-				C1 = (N/1024);
-			}
-			if (max2 == summation[i])
-			{
-				C2 = (N/1024);
-			}
-		}
-		N *= 2;
-	}
-	
-	if (C1 == C2) {
-		printf("\nCache Size is approximately :%d\n", C1);
-	}	
-	else {
-		printf("\nCache Size is between : %dKB to %dKB\n", C2, C1);
-	}
-	printf("Check the file output.txt generated in the executable folder to see the time plots\n");
 }
 
-/* Considering the cache size is not greater than 8MB */
 int main() {
-	long int sum = 0;
-	int i = 0, s = 0, k = 0;
-	double timeTaken;
-	clock_t start;
-	char *arr = NULL;
-	long int N = 0;
-	long int strides = 0;
-	int power_two = 12;
 	FILE *fp = NULL;
-	double plots[10][12] = {0};
-
-	fp = fopen("output.txt", "w");
+    unsigned int strides = 256 * MB;
+    static int arr[16 * MB];
+    int lengthMod = 0;
+    unsigned int i = 0;
+    int s = 0, k = 0;
+    double time_taken = 0;
+    clock_t start, end;
+    int N = sizeof(sizes)/sizeof(int);
+    double plots[rerun][N];
+    
+    fp = fopen("output.txt", "w");
 	if (fp == NULL) {
 		printf("Unable to open file output.txt\n");
-		exit(1);
+		return 1;
 	}
 
-	/* Regime 1 */
-	for (k = 0; k < 9; k++)
-	{
-		N = pow(2, power_two);
-		strides = 0;
-		arr = NULL;
-		fprintf(fp, "\nPlot : %d\n", k+1);
-		for (i = 0 ; i < 11; i++) {
-			N *= 2;
-			fprintf(fp, "Graph plot for %ldKB\n", (N/1024));
+    /* Regime 1 Saavedhra and Smith : Find Cache Size */
+	/* Considering the cache size is not greater than 8MB */
+	for (k = 0; k < rerun-1; k++) {
+		fprintf(fp, "Plot : %d\n", k+1);
+    	for (s = 0; s < N; s++) {
+	    	lengthMod = sizes[s] - 1;
+	    	start = clock();
+	    	for (i = 0; i < strides; i++) {
+	        	arr[(i * 16) & lengthMod] *= 10;
+            	arr[(i * 16) & lengthMod] /= 10;
+	    	}
+			end = clock();
+	    	time_taken = (double)(end - start)/CLOCKS_PER_SEC;
+        	plots[k][s] = time_taken;
+        	printf("%d, %.8f \n", (sizes[s] / KB), plots[k][s]);
+			fprintf(fp, "%d, %.8f \n", (sizes[s] / KB), plots[k][s]);
 			fflush(fp);
-			arr = (char*) malloc (N);
-			if (arr == NULL) {
-				printf("Unable to allocate memory\n");
-				exit(1);
-			}
-			strides = N / 2;
-			start = clock();
-			for (s = 0; s < strides; s++) {
-				arr[s] = (s * strides) + 1;
-			}
-			timeTaken = (double)(clock() - start)/CLOCKS_PER_SEC;
-			fprintf(fp, "Time for %.7f\n", timeTaken);
-			fflush(fp);
-			plots[k][i] = timeTaken;
-			free(arr);
-			arr = NULL;
-		}
+	    }
 	}
-	calculate_cache_size(plots);
+	calculate_cache_size(plots, fp);
 
-	return 0;
+    return 0;
 }

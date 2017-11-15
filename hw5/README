@@ -1,0 +1,11 @@
+Author : Nipesh Roy
+HW5 : Measure the characteristics of Cache
+
+README:
+1. Build using: make
+2. Run using ./hw5
+3. Check the file "output" for graph plotting.
+4. Use: make clean to clean the install.
+
+Can determine only cache Size.
+Reran the regime 1 algorithm multiple times to achieve better SNR ratio.
