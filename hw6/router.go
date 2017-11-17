@@ -44,7 +44,12 @@ func Cleaner(w http.ResponseWriter, r *http.Request) {
 	server[3] = "http://localhost:8084"
 	server_cnt := len(server)
 	server_data_cnt := make([]int, server_cnt)
-	server_data := [4][]Message{}
+	server_data := make([][]Message, server_cnt)
+	/*itr := 0
+	for itr < server_cnt {
+		server_data[itr] = make([]Message)
+		itr++
+	}*/
 
 	defer r.Body.Close()
 	if r.Body == nil {
