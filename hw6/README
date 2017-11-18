@@ -1,14 +1,16 @@
 HW6 : Distributed key-value store
 
-Authors - Nipesh Roy <roy.nip@husky.neu.edu>
-		  Sharmodeep Sarkar <sarkar.s@husky.neu.edu>
+Authors -
+1.Nipesh Roy <roy.nip@husky.neu.edu>
+2.Sharmodeep Sarkar <sarkar.s@husky.neu.edu>
 
-Server -> Written in python
-Router -> Written in golang
-Client -> Shell script making curl calls
+1.Server -> Written in python
+2.Router -> Written in golang
+3.Client -> Shell script making curl calls
 
-Requirements: 1.The client machine must have curl installed
-			  2.The server machine mush have python installed
+Requirements:
+1.The client machine must have curl installed
+2.The server machine mush have python installed
 
 TODO's:
 1. Delete operation
@@ -22,29 +24,31 @@ The following design decisions where taken:
 2. All the communication will happen over HTTP.
 3. The commands to be used for communication with the distributed key-value
 store is as follows:
-	a.set - will insert the keys to the distributed key-value store
-	b.query - 1. with POST -> will specify if a specified set of keys are
-							  presented in the distributed key value store or not
-			  2. with GET -> will get all the keys from the distributed
-			 	 			 key-value store
-	c.fetch - 1. with POST -> will get the value of a specified set of keys
-							  from the distributed key value store
-			  2. with GET -> will get all the key-values from the distributed
-			 	 			 key-value store
-	d.delete - ???
+	A.set - will insert the keys to the distributed key-value store
+	B.query -
+		1. with POST -> will specify if a specified set of keys are
+		presented in the distributed key value store or not
+		2. with GET -> will get all the keys from the distributed
+		key-value store
+	C.fetch -
+		1. with POST -> will get the value of a specified set of keys
+		from the distributed key value store
+		2. with GET -> will get all the key-values from the distributed
+		key-value store
+	D.delete - ???
 
 The following are the prerequisites for the project to run:
 1.Server_IP FILE:
-	The server ip file will contain entries as follows:
-	<IP_ADDRESS> <PORT>
-	one for each server entry on a new line
+The server ip file will contain entries as follows:
+<IP_ADDRESS> <PORT>
+one for each server entry on a new line
 Example:
-	localhost 8081
-	localhost 9000
+localhost 8081
+localhost 9000
 
 2.Sample json file :- application.json
-	Contains a sample json key-value format required by the client to interact with
-	the distributed key-value store
+Contains a sample json key-value format required by the client to interact with
+the distributed key-value store
 
 To run the distributed key-value store here is the procedure:
 
