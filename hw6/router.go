@@ -1,78 +1,44 @@
+/* Installation ----- https://tecadmin.net/install-go-on-ubuntu/# */
 package main
 
 import (
 	"encoding/json"
-	"encoding/base64"
-	"net/http"
-	"log"
+	"flag"
 	"fmt"
-	"strings"
-	"io"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"reflect"
+	"bytes"
 	"unicode/utf8"
+	"bufio"
+	"os"
+	"strings"
 )
 
-func printBody(req *http.Request) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(req.Body)
-	log.Println(string(body))
+type keyValueRequestDataArray struct {
+	KeyValuePair []keyValueRequestDataFormat `json:"keyvalue"`
 }
 
-type MessageArr struct {
-	Data []Message `json:"data"`
-}
-
-type Message struct {
+type keyValueRequestDataFormat struct {
 	Key string `json:"key"`
-	Value string `json:"value"`
+	Value string `json:"value,omitempty"`
 }
 
-type ServerLocWithKeyHash struct {
-	Key string
-	Value string
-	surl string
-}
+var server = make(map[int]string)
+var ports = make(map[int]string)
+var server_cnt = 0
 
-func Cleaner(w http.ResponseWriter, r *http.Request) {
-	server := make(map[int]string)
-	server[0] = "http://localhost:8081"
-	server[1] = "http://localhost:8082"
-	server[2] = "http://localhost:8083"
-	server[3] = "http://localhost:8084"
-	server_cnt := len(server)
+/* TODO: improve hashing -> Consistent hashing
+ * hashing implemented using simple modulo function
+ */
+func hashing (KeyValuePair []keyValueRequestDataFormat)([][]keyValueRequestDataFormat) {
 	server_data_cnt := make([]int, server_cnt)
-	server_data := make([][]Message, server_cnt)
-	/*itr := 0
-	for itr < server_cnt {
-		server_data[itr] = make([]Message)
-		itr++
-	}*/
-
-	defer r.Body.Close()
-	if r.Body == nil {
-		http.Error(w, "Please send Request body", 400)
-		return
-	}
-
-	var m MessageArr
-	dec := json.NewDecoder(r.Body)
-	err := dec.Decode(&m);
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(m.Data);
-
-	key_cnt := 0
-	for range m.Data {
-		key_cnt++;
-	}
+	server_data := make([][]keyValueRequestDataFormat, server_cnt)
 
 	x := 0
-	var row []Message
-	for _,v := range m.Data {
+	var row []keyValueRequestDataFormat
+	for _,v := range KeyValuePair {
 		temp := v.Key
 		i := 0;
 		for len(temp) > 0 {
@@ -80,11 +46,9 @@ func Cleaner(w http.ResponseWriter, r *http.Request) {
 			i = i + int(r)
 			temp = temp[size:]
 		}
-		fmt.Println(i)
-		hash := i % 4
-		fmt.Println(v.Key, v.Value, hash)
+		hash := i % server_cnt
 		row = server_data[hash]
-		row = append(row, Message{v.Key, v.Value})
+		row = append(row, keyValueRequestDataFormat{v.Key, v.Value})
 		server_data[hash] = row
 		server_data_cnt[hash]++;
 		x++;
@@ -92,76 +56,269 @@ func Cleaner(w http.ResponseWriter, r *http.Request) {
 	for index,val := range server_data {
 		fmt.Println(index, val);
 	}
-	fmt.Println(server_data);
+	return server_data
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	database := make(map[string][]byte)
-	database["key1"] = []byte("A")
-	database["key2"] = []byte("B")
-	database["key3"] = []byte("C")
-	database["key4"] = []byte("D")
+func formatDataForRequest(indx int, data []keyValueRequestDataFormat) ([]byte) {
+	var slice []keyValueRequestDataFormat
+	var i int
+	var v keyValueRequestDataFormat
+	var post_data keyValueRequestDataArray
+	var post_data_JSON []byte
+	var err_data error
+	var KeyValuePair_cnt int
 
-	switch r.Method {
-	case "GET":
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.Header().Set("Content-Transfer-Encoding", "BASE64")
-
-		mapD := make(map[string][]byte)
-		for key, value := range database {
-			fmt.Println("Key:", key, "Value:", value)
-
-			/* Serve the resource. */
-			length := base64.RawStdEncoding.EncodedLen(len(value))
-			base64val := make([]byte, length)
-			base64.RawStdEncoding.Encode(base64val, value)
-			log.Printf("base64: %s\n", base64val)
-
-			mapD[key] = base64val
-		}
-		mapB, _ := json.Marshal(mapD)
-		w.Write(mapB)
-	case "POST":
-		// Create a new record.
-	case "PUT":
-		// Update an existing record.
-		Cleaner(w, r);
-	case "DELETE":
-		// Remove the record.
-	default:
-		// Give an error message.
+	fmt.Println("SERVER :::: "+server[indx])
+	KeyValuePair_cnt = len(data)
+	fmt.Println("Total number of keyVals = %v", KeyValuePair_cnt)
+	if KeyValuePair_cnt == 0 {
+		return post_data_JSON
 	}
-	return
+	slice = make([]keyValueRequestDataFormat, KeyValuePair_cnt)
+	for i,v = range data {
+		fmt.Println("%v : %v \n", v.Key, v.Value)
+		slice[i] = v
+	}
+
+	post_data = keyValueRequestDataArray{slice}
+	post_data_JSON, err_data = json.Marshal(post_data)
+	if err_data != nil {
+		fmt.Println("Error in JSON formatting !! ")
+	}
+	return post_data_JSON
+}
+
+func makeRequest(indx int, post_data_JSON []byte, request_type string ) (string) {
+	var err_data error
+	var req *http.Request
+	var client *http.Client
+	var resp *http.Response
+
+	url := server[indx]
+
+	if request_type == "PUT" || request_type == "POST" {
+		req, err_data = http.NewRequest(request_type,
+										url,
+										bytes.NewBuffer(post_data_JSON))
+		client = &http.Client{}
+		resp, err_data = client.Do(req)
+		if err_data != nil {
+			panic(err_data)
+		}
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		return string(body)
+	} else {
+		fmt.Println("GET REQ STARTING !!\n")
+		resp, err_data = http.Get(url)
+
+		if err_data != nil {
+			panic(err_data)
+		}
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		return string(body)
+	}
+}
+
+/* GetHandler handles the index route */
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET HANDLER STARTING !!!!\n")
+	var slice []keyValueRequestDataFormat
+
+	for indx, _ := range server {
+		post_data_JSON :=  []byte("")
+		body := makeRequest(indx, post_data_JSON, "GET")
+
+		var msg keyValueRequestDataArray
+		err := json.Unmarshal([]byte(body), &msg)
+
+		if err != nil {
+			panic(err)
+		}
+
+		for _,v := range msg.KeyValuePair {
+			slice = append(slice, v)
+		}
+	}
+	restore_server_details()
+
+	response_data := keyValueRequestDataArray{slice}
+	fmt.Println(response_data)
+	fmt.Fprint(w, response_data)
+	fmt.Fprint(w, "\nGet Done !!\n")
+}
+
+func PostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		decodeJson := json.NewDecoder(r.Body)
+		var msg keyValueRequestDataArray
+		err := decodeJson.Decode(&msg)
+
+		if err != nil {
+			panic(err)
+		}
+
+		// hashing
+		server_data := hashing(msg.KeyValuePair)
+
+		var slice []keyValueRequestDataFormat
+		for indx, data := range server_data {
+			if len(data) == 0 {
+				fmt.Println("url %s has no data", server[indx])
+				continue
+			}
+
+			// formatting data for request
+			post_data_JSON := formatDataForRequest(indx, data)
+			fmt.Println(post_data_JSON)
+
+			// forward to server
+			body := makeRequest(indx, post_data_JSON, "POST")
+			fmt.Println(body)
+
+			var msg keyValueRequestDataArray
+			err := json.Unmarshal([]byte(body), &msg)
+			if err != nil {
+				panic(err)
+			}
+
+			for _,v := range msg.KeyValuePair {
+				slice = append(slice, v)
+			}
+
+		}
+		restore_server_details()
+
+		response_data := keyValueRequestDataArray{slice}
+		fmt.Println(response_data)
+		fmt.Fprint(w, response_data)
+	} else {
+		fmt.Println("Protocol NOT supported !!")
+	}
+}
+
+func PutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "PUT" {
+		decodeJson := json.NewDecoder(r.Body)
+
+		var msg keyValueRequestDataArray
+		err := decodeJson.Decode(&msg)
+
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(reflect.TypeOf(msg.KeyValuePair))
+		fmt.Println(msg)
+
+		/* find the server using hash */
+		server_data := hashing(msg.KeyValuePair)
+
+		for indx, data := range server_data {
+			if len(data) == 0 {
+				continue
+			}
+			// formatting data for request
+			post_data_JSON := formatDataForRequest(indx, data)
+			fmt.Println(post_data_JSON)
+
+			// forward to server
+			body := makeRequest(indx, post_data_JSON, "PUT")
+			fmt.Println(body)
+			// fmt.Println("response Status:", resp.Status)
+			// fmt.Println("response Headers:", resp.Header)
+			// body, _ := ioutil.ReadAll(resp.Body)
+			// fmt.Println("response Body:", string(body))
+		}
+		restore_server_details()
+	}
+}
+
+func fetch(w http.ResponseWriter, r *http.Request) {
+	make_server_addresses("/fetch")
+
+	if r.Method == "POST" {
+		PostHandler(w, r)
+	} else if r.Method == "GET" {
+		GetHandler(w, r)
+	} else {
+		fmt.Print("Method not Supported on this end point!!")
+		fmt.Fprint(w, "Method not Supported on this end point!!")
+	}
+}
+
+func query(w http.ResponseWriter, r *http.Request) {
+	make_server_addresses("/query")
+
+	if r.Method == "POST" {
+		PostHandler(w, r)
+	} else if r.Method == "GET" {
+		GetHandler(w, r)
+	} else {
+		fmt.Print("Method not Supported on this end point!!")
+		fmt.Fprint(w, "Method not Supported on this end point!!")
+	}
+}
+
+func set(w http.ResponseWriter, r *http.Request) {
+	make_server_addresses("/set")
+
+	if r.Method == "PUT" {
+		PutHandler(w, r)
+	} else {
+		fmt.Print("Method not Supported on this end point!!")
+		fmt.Fprint(w, "Method not Supported on this end point!!")
+	}
+}
+
+func make_server_addresses(endpoint string){
+	for i, s := range server {
+		server[i] = s+":"+ports[i]+endpoint
+	}
+}
+
+func restore_server_details() {
+	file, err := os.Open(os.Args[2])
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	i := 0
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+		server_url := "http://"
+		result := strings.Split(scanner.Text(), " ")
+		server_url += result[0]
+		server_port := result[1]
+		server[i] = server_url
+		ports[i] = server_port
+		fmt.Println(server_url, server_port)
+		i++
+	}
+	server_cnt = i + 1
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func init() {
+	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
+	flag.Parse()
+	restore_server_details()
+	server_cnt = len(server)
 }
 
 func main() {
-	/* register you http handler */
-	http.HandleFunc("/", handler)
-	/* Listening on port 8080 on the router */
-	fmt.Println("SERVER LISTENING");
-	err := http.ListenAndServe(":8080", nil)
-	log.Fatal(err)
-}
+	/* flagPort is the open port the application listens on */
+	var (flagPort = flag.String("port", os.Args[1], "Port to listen on"))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/query", query)
+	mux.HandleFunc("/fetch", fetch)
+	mux.HandleFunc("/set", set)
 
-func temp() {
-	const jsonStream = `
-	{"Name": "Ed", "Text": "Knock knock."}
-	{"Name": "Sam", "Text": "Who's there?"}
-	{"Name": "Ed", "Text": "Go fmt."}
-	{"Name": "Sam", "Text": "Go fmt who?"}
-	{"Name": "Ed", "Text": "Go fmt yourself!"}
-	`
-	type Message struct {
-		Name, Text string
-	}
-	dec := json.NewDecoder(strings.NewReader(jsonStream))
-	for {
-		var m Message
-		if err := dec.Decode(&m); err == io.EOF {
-			break
-		} else if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s: %s\n", m.Name, m.Text)
-	}
+	log.Printf("listening on port %s", *flagPort)
+	log.Fatal(http.ListenAndServe(":"+*flagPort, mux))
 }

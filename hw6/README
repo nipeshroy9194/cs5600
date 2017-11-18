@@ -1,0 +1,49 @@
+HW6 : Distributed key-value store
+
+Authors - Nipesh Roy <roy.nip@husky.neu.edu>
+		  Sharmodeep Sarkar <sarkar.s@husky.neu.edu>
+
+Server -> Written in python
+Router -> Written in golang
+Client -> Shell script making curl calls
+
+Requirements: 1.The client machine must have curl installed
+			  2.The server machine mush have python installed
+
+Design Strategy:-
+The following design decisions where taken:
+1. The client will be a simple bash script making curl calls to the http router
+2. All the communication will happen over HTTP.
+3. The commands to be used for communication with the distributed key-value
+store is as follows:
+	a.set - will insert the keys to the distributed key-value store
+	b.query - 1. with POST -> will specify if a specified set of keys are
+							  presented in the distributed key value store or not
+			  2. with GET -> will get all the keys from the distributed
+			 	 			 key-value store
+	c.fetch - 1. with POST -> will get the value of a specified set of keys
+							  from the distributed key value store
+			  2. with GET -> will get all the key-values from the distributed
+			 	 			 key-value store
+	d.delete - ???
+
+The following are the prerequisites for the project to run:
+1.Server_IP FILE:
+	The server ip file will contain entries as follows:
+	<IP_ADDRESS> <PORT>
+	one for each server entry on a new line
+Example:
+	localhost 8081
+	localhost 9000
+
+2.Sample json file :- application.json
+	Contains a sample json key-value format required by the client to interact with
+	the distributed key-value store
+
+To run the distributed key-value store here is the procedure:
+
+1.Start the server using the following command
+./automate.sh <router_port_number> <server_ip_file>
+
+2.Use the shell script client.sh to test the distributed key-value store
+./client.sh
