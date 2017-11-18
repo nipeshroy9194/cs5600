@@ -10,6 +10,12 @@ Client -> Shell script making curl calls
 Requirements: 1.The client machine must have curl installed
 			  2.The server machine mush have python installed
 
+TODO's:
+1. Delete operation
+2. support base64 encoding
+3. Multiple server support
+4. Provide binaries for python
+
 Design Strategy:-
 The following design decisions where taken:
 1. The client will be a simple bash script making curl calls to the http router
