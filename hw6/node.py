@@ -70,7 +70,17 @@ class S(BaseHTTPRequestHandler):
             key = k_v['key']
             val = k_v['value']
             print key, '------',val
+            if key in key_value:
+                row = {"key": key, "value": "UPDATED"}
+            else:
+                row = {"key": key, "value": "INSERTED"}
             key_value[key] = val 
+            response_data.append(row)
+        response = {"keyvalue": response_data}
+        resp_json = json.dumps(response)
+        print "RESPONSE :::: ", resp_json
+        self.wfile.write(resp_json) 
+
 
     def do_HEAD(self):
         self._set_headers()

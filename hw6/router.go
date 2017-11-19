@@ -36,6 +36,8 @@ func hashing (KeyValuePair []keyValueRequestDataFormat)([][]keyValueRequestDataF
 	server_data_cnt := make([]int, server_cnt)
 	server_data := make([][]keyValueRequestDataFormat, server_cnt)
 
+	fmt.Println("SERVER_CNT ========= ", server_cnt)
+
 	x := 0
 	var row []keyValueRequestDataFormat
 	for _,v := range KeyValuePair {
@@ -215,7 +217,9 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 		/* find the server using hash */
 		server_data := hashing(msg.KeyValuePair)
 
+		var slice []keyValueRequestDataFormat
 		for indx, data := range server_data {
+			fmt.Println("SERVER NUMBER =========== ", indx)
 			if len(data) == 0 {
 				continue
 			}
@@ -225,12 +229,23 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 
 			// forward to server
 			body := makeRequest(indx, post_data_JSON, "PUT")
-			fmt.Println(body)
-			// fmt.Println("response Status:", resp.Status)
-			// fmt.Println("response Headers:", resp.Header)
-			// body, _ := ioutil.ReadAll(resp.Body)
-			// fmt.Println("response Body:", string(body))
+			var msg keyValueRequestDataArray
+			err := json.Unmarshal([]byte(body), &msg)
+
+			if err != nil {
+				panic(err)
+			}
+
+			for _,v := range msg.KeyValuePair {
+				slice = append(slice, v)
+			}
+
+
 		}
+
+		response_data := keyValueRequestDataArray{slice}
+		fmt.Println("ROUTER RESPONSE ::::: ", response_data)
+		fmt.Fprint(w, response_data)
 		
 	}
 }
@@ -302,7 +317,7 @@ func restore_server_details() {
 		fmt.Println(server_url, server_port)
 		i++
 	}
-	server_cnt = i + 1
+	server_cnt = i
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
@@ -312,7 +327,7 @@ func restore_server_details() {
 func init() {
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 	flag.Parse()
-	// restore_server_details()
+	restore_server_details()
 	server_cnt = len(server)
 }
 
