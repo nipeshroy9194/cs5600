@@ -16,16 +16,22 @@ Requirements:
 TODO's:
 1. Delete operation
 2. support base64 encoding
-3. Multiple server support
+3. Dynamic server addition
 4. Provide binaries for python
 
 Design Strategy:-
 The following design decisions where taken:
 1. The client will be a simple bash script making curl calls to the http router
 2. All the communication will happen over HTTP.
-3. The commands to be used for communication with the distributed key-value
+3. The JSON key-value format is as follows:
+	A. For PUT:
+	{"keyvalue":["key":"string", "value":"string/base64",....]}
+	B. For POST:
+	{"keyvalue":["key":"string",.....]}
+4. The commands to be used for communication with the distributed key-value
 store is as follows:
 	A.set - will insert the keys to the distributed key-value store
+			and update a key if it is already present in the database
 	B.query -
 		1. with POST -> will specify if a specified set of keys are
 		presented in the distributed key value store or not
@@ -46,6 +52,7 @@ one for each server entry on a new line
 Example:
 localhost 8081
 localhost 9000
+A sample server_ip file has been provided in the repository.
 
 2.Sample json file :-
 a.put.json
@@ -56,9 +63,13 @@ b.post.json
 	fetched from the distributed key-value store
 
 To run the distributed key-value store here is the procedure:
-
 1.Start the server using the following command
-./automate.sh <router_port_number> <server_ip_file>
-
+	./automate.sh <router_port_number> <server_ip_file>
 2.Use the shell script client.sh to test the distributed key-value store
-./client.sh
+	./client.sh <router_port_number>
+
+To stop all the processes
+1. Stop the go router by killing the automation script.
+2. pkill -KILL python -
+	to kill all the python background server processes created by the
+	automation script

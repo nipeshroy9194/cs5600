@@ -17,7 +17,7 @@ int main()
 	int i = 0, j = 0;
 	long int ram_size = 0;
 	clock_t start;
-	double timeTaken;
+	double timeTaken = 0;
 	long int GB = 1024 * 1024 * 1024;
 	FILE *fp = NULL;
 
@@ -45,7 +45,7 @@ int main()
 		{
 			memset(p[j], 0, CHUNK_ALLOCATED);
 		}
-		ram_size += (CHUNK_ALLOCATED / (MB)); 
+		ram_size += (CHUNK_ALLOCATED / (MB));
 		timeTaken = (double)(clock() - start)/CLOCKS_PER_SEC;
 		fprintf(fp, "%ldMB, %.8f\n", ram_size, timeTaken);
 		fflush(fp);

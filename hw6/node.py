@@ -116,6 +116,6 @@ if __name__ == "__main__":
     from sys import argv
 
     if len(argv) == 3:
-        run(host=argv[1].encode('string-escape'), port=int(argv[2]))
+        run(host=argv[1], port=int(argv[2]))
     else:
         run()
