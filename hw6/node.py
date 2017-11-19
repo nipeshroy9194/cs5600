@@ -115,6 +115,33 @@ class S(BaseHTTPRequestHandler):
         print "Response :: ", resp_json
         self.wfile.write(resp_json) 
 
+    def do_DELETE(self):
+        print "------ DELETE IN SERVER -----"
+        response_data = []
+        print self.path
+        if not (self.path == '/delete'):
+            self._set_headers(403)
+            self.wfile.write(response = {"keyvalue": response_data})
+            return
+        self._set_headers(200)
+        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
+        content = self.rfile.read(content_length) # <--- Gets the data itself
+        content_lst = json.loads(content)
+        print content_lst
+        for k_v in content_lst['keyvalue']:
+            key = k_v['key']
+            if key in key_value:
+                row = {"key" : key, "value" : "DELETED"}
+            else:
+                row = {"key" : key, "value" : "KEY NOT FOUND"}
+            key_value.pop(key, None)
+            response_data.append(row)
+        response = {"keyvalue": response_data}
+        resp_json = json.dumps(response)
+        print "Response :: ", resp_json
+        self.wfile.write(resp_json) 
+            
+
 def run(server_class=HTTPServer, handler_class=S, host='', port=80):
     server_address = (host, port)
     httpd = server_class(server_address, handler_class)
@@ -126,6 +153,6 @@ if __name__ == "__main__":
     from sys import argv
 
     if len(argv) == 3:
-        run(host=argv[1], port=int(argv[2]))
+        run(host=argv[1].encode('string-escape'), port=int(argv[2]))
     else:
         run()

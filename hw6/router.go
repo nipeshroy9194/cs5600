@@ -99,10 +99,10 @@ func makeRequest(indx int, post_data_JSON []byte, request_type string ) (string)
 
 	url := server[indx]
 
-	if request_type == "PUT" || request_type == "POST" {
+	if request_type == "PUT" || request_type == "POST" || request_type == "DELETE" {
 		req, err_data = http.NewRequest(request_type,
 										url,
-									    bytes.NewBuffer(post_data_JSON))
+										bytes.NewBuffer(post_data_JSON))
 		client = &http.Client{}
 		resp, err_data = client.Do(req)
 		if err_data != nil {
@@ -144,6 +144,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 			slice = append(slice, v)
 		}
 	}
+	restore_server_details()
 
 	response_data := keyValueRequestDataArray{slice}
 	//fmt.Println(response_data)
@@ -173,7 +174,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 			// formatting data for request
 			post_data_JSON := formatDataForRequest(index, data)
-			//fmt.Println("Data:", post_data_JSON)
+			fmt.Println(post_data_JSON)
 
 			// forward to server
 			body := makeRequest(index, post_data_JSON, "POST")
@@ -189,6 +190,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 			for _,v := range msg.KeyValuePair {
 				slice = append(slice, v)
 			}
+
 		}
 		response_data := keyValueRequestDataArray{slice}
 		//fmt.Println(response_data)
@@ -196,6 +198,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Protocol NOT supported !!")
 	}
+	restore_server_details()
 }
 
 func PutHandler(w http.ResponseWriter, r *http.Request) {
@@ -239,14 +242,60 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 
 
 		}
-<<<<<<< HEAD
 
 		response_data := keyValueRequestDataArray{slice}
 		fmt.Println("ROUTER RESPONSE ::::: ", response_data)
 		fmt.Fprint(w, response_data)
 		
-=======
->>>>>>> ee7a4624267a01db30eb0a5517e43f34ecb7aade
+	}
+}
+
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "DELETE" {
+		decodeJson := json.NewDecoder(r.Body)
+
+		var msg keyValueRequestDataArray
+		err := decodeJson.Decode(&msg)
+
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(reflect.TypeOf(msg.KeyValuePair))
+		fmt.Println(msg)
+
+		/* find the server using hash */
+		server_data := hashing(msg.KeyValuePair)
+
+		var slice []keyValueRequestDataFormat
+		for indx, data := range server_data {
+			if len(data) == 0 {
+				continue
+			}
+			// formatting data for request
+			post_data_JSON := formatDataForRequest(indx, data)
+			fmt.Println(post_data_JSON)
+
+			// forward to server
+			body := makeRequest(indx, post_data_JSON, "DELETE")
+			var msg keyValueRequestDataArray
+			err := json.Unmarshal([]byte(body), &msg)
+
+			if err != nil {
+				panic(err)
+			}
+
+			for _,v := range msg.KeyValuePair {
+				slice = append(slice, v)
+			}
+
+
+		}
+
+		response_data := keyValueRequestDataArray{slice}
+		fmt.Println("ROUTER RESPONSE ::::: ", response_data)
+		fmt.Fprint(w, response_data)
+		
 	}
 }
 
@@ -290,7 +339,19 @@ func set(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func make_server_addresses(endpoint string) {
+func deleteKey(w http.ResponseWriter, r *http.Request) {
+	restore_server_details()
+	make_server_addresses("/delete")
+
+	if r.Method == "DELETE" {
+		DeleteHandler(w, r)
+	} else {
+		fmt.Print("Method not Supported on this end point!!")
+		fmt.Fprint(w, "Method not Supported on this end point!!")
+	}
+}
+
+func make_server_addresses(endpoint string){
 	for i, s := range server {
 		server[i] = s+":"+ports[i]+endpoint
 		fmt.Println(server[i])
@@ -299,7 +360,7 @@ func make_server_addresses(endpoint string) {
 
 func restore_server_details() {
 	fmt.Println("Restore Server Details")
-	file, err := os.Open(os.Args[2])
+	file, err := os.Open(os.Args[3])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -327,10 +388,7 @@ func restore_server_details() {
 func init() {
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 	flag.Parse()
-<<<<<<< HEAD
 	restore_server_details()
-=======
->>>>>>> ee7a4624267a01db30eb0a5517e43f34ecb7aade
 	server_cnt = len(server)
 }
 
@@ -338,12 +396,13 @@ func main() {
 	/* flagPort is the open port the application listens on */
 	fmt.Println(os.Args[1])
 	fmt.Println(os.Args[2])
-	var (flagPort = flag.String("port", os.Args[1], "Port to listen on"))
+	var (flagPort = flag.String("port", os.Args[2], "Port to listen on"))
 	mux := http.NewServeMux()
 	mux.HandleFunc("/query", query)
 	mux.HandleFunc("/fetch", fetch)
 	mux.HandleFunc("/set", set)
+	mux.HandleFunc("/delete", deleteKey)
 
 	log.Printf("listening on port %s", *flagPort)
-	log.Fatal(http.ListenAndServe(":"+*flagPort, mux))
+	log.Fatal(http.ListenAndServe(os.Args[1]+":"+*flagPort, mux))
 }
