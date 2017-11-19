@@ -102,7 +102,7 @@ func makeRequest(indx int, post_data_JSON []byte, request_type string ) (string)
 	if request_type == "PUT" || request_type == "POST" {
 		req, err_data = http.NewRequest(request_type,
 										url,
-										bytes.NewBuffer(post_data_JSON))
+									    bytes.NewBuffer(post_data_JSON))
 		client = &http.Client{}
 		resp, err_data = client.Do(req)
 		if err_data != nil {
@@ -144,7 +144,6 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 			slice = append(slice, v)
 		}
 	}
-	restore_server_details()
 
 	response_data := keyValueRequestDataArray{slice}
 	//fmt.Println(response_data)
@@ -174,7 +173,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 			// formatting data for request
 			post_data_JSON := formatDataForRequest(index, data)
-			fmt.Println(post_data_JSON)
+			//fmt.Println("Data:", post_data_JSON)
 
 			// forward to server
 			body := makeRequest(index, post_data_JSON, "POST")
@@ -190,7 +189,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 			for _,v := range msg.KeyValuePair {
 				slice = append(slice, v)
 			}
-
 		}
 		response_data := keyValueRequestDataArray{slice}
 		//fmt.Println(response_data)
@@ -198,7 +196,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Protocol NOT supported !!")
 	}
-	restore_server_details()
 }
 
 func PutHandler(w http.ResponseWriter, r *http.Request) {
@@ -242,11 +239,14 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 
 
 		}
+<<<<<<< HEAD
 
 		response_data := keyValueRequestDataArray{slice}
 		fmt.Println("ROUTER RESPONSE ::::: ", response_data)
 		fmt.Fprint(w, response_data)
 		
+=======
+>>>>>>> ee7a4624267a01db30eb0a5517e43f34ecb7aade
 	}
 }
 
@@ -290,7 +290,7 @@ func set(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func make_server_addresses(endpoint string){
+func make_server_addresses(endpoint string) {
 	for i, s := range server {
 		server[i] = s+":"+ports[i]+endpoint
 		fmt.Println(server[i])
@@ -327,7 +327,10 @@ func restore_server_details() {
 func init() {
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 	flag.Parse()
+<<<<<<< HEAD
 	restore_server_details()
+=======
+>>>>>>> ee7a4624267a01db30eb0a5517e43f34ecb7aade
 	server_cnt = len(server)
 }
 
