@@ -142,7 +142,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 			slice = append(slice, v)
 		}
 	}
-	//restore_server_details()
+	restore_server_details()
 
 	response_data := keyValueRequestDataArray{slice}
 	//fmt.Println(response_data)
@@ -196,7 +196,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Protocol NOT supported !!")
 	}
-	//restore_server_details()
+	restore_server_details()
 }
 
 func PutHandler(w http.ResponseWriter, r *http.Request) {
@@ -231,11 +231,12 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 			// body, _ := ioutil.ReadAll(resp.Body)
 			// fmt.Println("response Body:", string(body))
 		}
-		//restore_server_details()
+		
 	}
 }
 
 func fetch(w http.ResponseWriter, r *http.Request) {
+	restore_server_details()
 	make_server_addresses("/fetch")
 
 	if r.Method == "POST" {
@@ -249,6 +250,7 @@ func fetch(w http.ResponseWriter, r *http.Request) {
 }
 
 func query(w http.ResponseWriter, r *http.Request) {
+	restore_server_details()
 	make_server_addresses("/query")
 
 	if r.Method == "POST" {
@@ -262,6 +264,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 }
 
 func set(w http.ResponseWriter, r *http.Request) {
+	restore_server_details()
 	make_server_addresses("/set")
 
 	if r.Method == "PUT" {
@@ -275,10 +278,12 @@ func set(w http.ResponseWriter, r *http.Request) {
 func make_server_addresses(endpoint string){
 	for i, s := range server {
 		server[i] = s+":"+ports[i]+endpoint
+		fmt.Println(server[i])
 	}
 }
 
 func restore_server_details() {
+	fmt.Println("Restore Server Details")
 	file, err := os.Open(os.Args[2])
 	if err != nil {
 		log.Fatal(err)
@@ -307,12 +312,14 @@ func restore_server_details() {
 func init() {
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 	flag.Parse()
-	restore_server_details()
+	// restore_server_details()
 	server_cnt = len(server)
 }
 
 func main() {
 	/* flagPort is the open port the application listens on */
+	fmt.Println(os.Args[1])
+	fmt.Println(os.Args[2])
 	var (flagPort = flag.String("port", os.Args[1], "Port to listen on"))
 	mux := http.NewServeMux()
 	mux.HandleFunc("/query", query)

@@ -11,4 +11,9 @@ while IFS= read -r line; do
 	python node.py $ip $port &	
 done < "$2"
   
-./router $router_port $text_file
+# ./router $router_port $text_file
+go run router.go $router_port $text_file
+
+
+
+

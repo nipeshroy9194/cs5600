@@ -11,6 +11,7 @@ Authors -
 Requirements:
 1.The client machine must have curl installed
 2.The server machine mush have python installed
+3.The client machine must have Go installed
 
 TODO's:
 1. Delete operation

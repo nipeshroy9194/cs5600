@@ -1,7 +1,8 @@
 #!/bin/bash
 # A simple client doing curl on distributed key-value store
 
-router_port=8080
+router_port=$2
+router_ip=$1
 json_put=put.json
 json_post=post.json
 
