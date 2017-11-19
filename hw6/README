@@ -30,8 +30,9 @@ The following design decisions where taken:
 	{"keyvalue":["key":"string",.....]}
 4. The commands to be used for communication with the distributed key-value
 store is as follows:
-	A.set - will insert the keys to the distributed key-value store
-			and update a key if it is already present in the database
+	A.set -
+		will insert the keys to the distributed key-value store
+		and update a key if it is already present in the database
 	B.query -
 		1. with POST -> will specify if a specified set of keys are
 		presented in the distributed key value store or not
