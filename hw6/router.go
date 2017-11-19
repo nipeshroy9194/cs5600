@@ -299,7 +299,7 @@ func make_server_addresses(endpoint string) {
 
 func restore_server_details() {
 	fmt.Println("Restore Server Details")
-	file, err := os.Open(os.Args[2])
+	file, err := os.Open(os.Args[3])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -338,12 +338,12 @@ func main() {
 	/* flagPort is the open port the application listens on */
 	fmt.Println(os.Args[1])
 	fmt.Println(os.Args[2])
-	var (flagPort = flag.String("port", os.Args[1], "Port to listen on"))
+	var (flagPort = flag.String("port", os.Args[2], "Port to listen on"))
 	mux := http.NewServeMux()
 	mux.HandleFunc("/query", query)
 	mux.HandleFunc("/fetch", fetch)
 	mux.HandleFunc("/set", set)
 
 	log.Printf("listening on port %s", *flagPort)
-	log.Fatal(http.ListenAndServe(":"+*flagPort, mux))
+	log.Fatal(http.ListenAndServe(os.Args[1]+":"+*flagPort, mux))
 }
