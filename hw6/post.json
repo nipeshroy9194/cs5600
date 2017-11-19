@@ -1,0 +1,13 @@
+{
+	"keyvalue":[
+		{"key":"auth_token"},
+		{"key":"name"},
+		{"key":"city"},
+		{"key":"address"},
+		{"key":"latitude"},
+		{"key":"longitude"},
+		{"key":"washing"},
+		{"key":"founded_at_year"},
+		{"key":"products"}
+	]
+}

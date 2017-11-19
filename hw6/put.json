@@ -1,6 +1,5 @@
 {
-	"keyvalue":[
-		{"key":"auth_token","value":"B8dsbz4HExMskqUa6Qhn"},
+	"keyvalue":[{"key":"auth_token","value":"B8dsbz4HExMskqUa6Qhn"},
 		{"key":"name","value":"Fuelstation Central"},
 		{"key":"city","value":"Grossbeeren"},
 		{"key":"address","value":"Buschweg 1"},
@@ -8,6 +7,5 @@
 		{"key":"longitude","value":"13.3332"},
 		{"key":"washing","value":"true"},
 		{"key":"founded_at_year","value":"2000"},
-		{"key":"products","value":"yoyo"}
-	]
+		{"key":"products","value":"yoyo"}]
 }

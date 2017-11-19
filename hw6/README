@@ -46,9 +46,13 @@ Example:
 localhost 8081
 localhost 9000
 
-2.Sample json file :- application.json
-Contains a sample json key-value format required by the client to interact with
-the distributed key-value store
+2.Sample json file :-
+a.put.json
+	Contains a sample json key-value format required by the client to interact with
+	the distributed key-value store
+b.post.json
+	Contains a sample json with only keys in there whose values are to be
+	fetched from the distributed key-value store
 
 To run the distributed key-value store here is the procedure:
 

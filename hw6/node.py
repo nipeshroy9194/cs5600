@@ -16,7 +16,7 @@ from urlparse import parse_qs
 import json
 import string
 
-key_value = {'abc':'123', 'xyz':'098'}
+key_value = {}
 KEY_NOT_FOUND = "KEY NOT FOUND"
 
 '''

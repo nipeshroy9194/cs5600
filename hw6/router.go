@@ -41,6 +41,7 @@ func hashing (KeyValuePair []keyValueRequestDataFormat)([][]keyValueRequestDataF
 	for _,v := range KeyValuePair {
 		temp := v.Key
 		i := 0;
+		/* Find ascii value of string for hashing */
 		for len(temp) > 0 {
 			r, size := utf8.DecodeRuneInString(temp)
 			i = i + int(r)
@@ -70,13 +71,13 @@ func formatDataForRequest(indx int, data []keyValueRequestDataFormat) ([]byte) {
 
 	fmt.Println("SERVER :::: "+server[indx])
 	KeyValuePair_cnt = len(data)
-	fmt.Println("Total number of keyVals = %v", KeyValuePair_cnt)
+	fmt.Println("Total number of keyVals = ", KeyValuePair_cnt)
 	if KeyValuePair_cnt == 0 {
 		return post_data_JSON
 	}
 	slice = make([]keyValueRequestDataFormat, KeyValuePair_cnt)
 	for i,v = range data {
-		fmt.Println("%v : %v \n", v.Key, v.Value)
+		fmt.Println("\n", v.Key, v.Value)
 		slice[i] = v
 	}
 
@@ -141,10 +142,10 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 			slice = append(slice, v)
 		}
 	}
-	restore_server_details()
+	//restore_server_details()
 
 	response_data := keyValueRequestDataArray{slice}
-	fmt.Println(response_data)
+	//fmt.Println(response_data)
 	fmt.Fprint(w, response_data)
 	fmt.Fprint(w, "\nGet Done !!\n")
 }
@@ -154,32 +155,33 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		decodeJson := json.NewDecoder(r.Body)
 		var msg keyValueRequestDataArray
 		err := decodeJson.Decode(&msg)
-
 		if err != nil {
+			fmt.Println("Error here 1\n");
 			panic(err)
 		}
 
-		// hashing
+		/* find the server using hash */
 		server_data := hashing(msg.KeyValuePair)
 
 		var slice []keyValueRequestDataFormat
-		for indx, data := range server_data {
+		for index, data := range server_data {
 			if len(data) == 0 {
-				fmt.Println("url %s has no data", server[indx])
+				fmt.Println("url %s has no data", server[index])
 				continue
 			}
 
 			// formatting data for request
-			post_data_JSON := formatDataForRequest(indx, data)
+			post_data_JSON := formatDataForRequest(index, data)
 			fmt.Println(post_data_JSON)
 
 			// forward to server
-			body := makeRequest(indx, post_data_JSON, "POST")
-			fmt.Println(body)
+			body := makeRequest(index, post_data_JSON, "POST")
+			//fmt.Println(body)
 
 			var msg keyValueRequestDataArray
 			err := json.Unmarshal([]byte(body), &msg)
 			if err != nil {
+				fmt.Println("Error here 2\n");
 				panic(err)
 			}
 
@@ -188,14 +190,13 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-		restore_server_details()
-
 		response_data := keyValueRequestDataArray{slice}
-		fmt.Println(response_data)
+		//fmt.Println(response_data)
 		fmt.Fprint(w, response_data)
 	} else {
 		fmt.Println("Protocol NOT supported !!")
 	}
+	//restore_server_details()
 }
 
 func PutHandler(w http.ResponseWriter, r *http.Request) {
@@ -230,7 +231,7 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 			// body, _ := ioutil.ReadAll(resp.Body)
 			// fmt.Println("response Body:", string(body))
 		}
-		restore_server_details()
+		//restore_server_details()
 	}
 }
 
@@ -287,7 +288,6 @@ func restore_server_details() {
 	i := 0
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
 		server_url := "http://"
 		result := strings.Split(scanner.Text(), " ")
 		server_url += result[0]
