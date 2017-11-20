@@ -11,3 +11,4 @@ curl -iH 'Content-Type: application/json' -X POST -d @$json_post $router_ip:$rou
 curl -iH 'Content-Type: application/json' -X POST -d @$json_post $router_ip:$router_port/fetch
 curl -iH "Accept: application/json" -X GET $router_ip:$router_port/fetch
 curl -iH "Accept: application/json" -X GET $router_ip:$router_port/query
+curl -iH 'Content-Type: application/json' -X DELETE -d @$json_post $router_ip:$router_port/delete

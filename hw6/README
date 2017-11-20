@@ -13,22 +13,49 @@ Requirements:
 2.The server machine mush have python installed
 3.The client machine must have Go installed
 
-TODO's:
-1. Delete operation
-2. support base64 encoding
-3. Dynamic server addition
-4. Provide binaries for python
-
 Design Strategy:-
 The following design decisions where taken:
 1. The client will be a simple bash script making curl calls to the http router
 2. All the communication will happen over HTTP.
 3. The JSON key-value format is as follows:
 	A. For PUT:
-	{"keyvalue":["key":"string", "value":"string/base64",....]}
+		a.input : http://<ip_addr>:<port>/set
+		b.JSON to be provided is of the format:
+			{"keyvalue":["key":"string", "value":"string/base64",....]}
+		c.Output will be of the format:
+			{"keyvalue":["key1":"INSERTED", "key2":"UPDATED",.....]}
 	B. For POST:
-	{"keyvalue":["key":"string",.....]}
-4. The commands to be used for communication with the distributed key-value
+		a.input : http://<ip_addr>:<port>/(query/fetch)	
+		b.JSON to be provided is of the format:
+			{"keyvalue":["key":"string",.....]}
+		c.Output will be of the format:
+			1. for query:
+				{"keyvalue":["key1":true, "key2":false,.....]}	
+			2. for fetch:
+				{"keyvalue":["key1":"value", "key2":"value",.....]}
+	C. FOR GET:
+		a.input : http://<ip_addr>:<port>/(query/fetch)
+		b.Output will be of the format:
+			1. for query: (all keys will be retrieved)
+				{"keyvalue":["key1":true, "key2":false,.....]
+			2. for fetch: (all keys will be retrieved)
+				{"keyvalue":["key1":"value", "key2":"value",.....]}
+	B. For POST:
+		a.input : http://<ip_addr>:<port>/(query/fetch)	
+		b.JSON to be provided is of the format:
+			{"keyvalue":["key":"string",.....]}
+		c.Output will be of the format:
+			1. for query:
+				{"keyvalue":["key1":true, "key2":false,.....]}	
+			2. for fetch:
+				{"keyvalue":["key1":"value", "key2":"value",.....]}
+	D. For DELETE:
+		a.input : http://<ip_addr>:<port>/delete	
+		b.JSON to be provided is of the format:
+			{"keyvalue":["key":"string",.....]}
+		c.Output will be of the format:
+				{"keyvalue":["key1":"DELETED", "key2":"DELETED".....]}	
+5. The commands to be used for communication with the distributed key-value
 store is as follows:
 	A.set -
 		will insert the keys to the distributed key-value store
@@ -43,7 +70,12 @@ store is as follows:
 		from the distributed key value store
 		2. with GET -> will get all the key-values from the distributed
 		key-value store
-	D.delete - ???
+	D.delete -
+		delete the specified key-value from the distributed key-value
+		store
+6. HTTP Status codes used
+	A. SUCCESS - 200
+	B. FAILURE - 404
 
 The following are the prerequisites for the project to run:
 1.Server_IP FILE:
