@@ -47,9 +47,12 @@ int main()
 		}
 		ram_size += (CHUNK_ALLOCATED / (MB));
 		ram_size += (CHUNK_ALLOCATED / (MB)); 
-		prev_time = timeTaken;
+		if (i > 9) { /* Considering RAM will be atleast 400 MB */
+			prev_time = timeTaken;
+		}
 		timeTaken = (double)(clock() - start)/CLOCKS_PER_SEC;
-		if (prev_time < 2 * timeTaken) {
+		printf("Prev time : %lf, TimeTaken : %lf\n", prev_time, timeTaken);
+		if ((prev_time != 0) && ((2 * prev_time) < timeTaken)) {
 			for (k = 0; k < i ; k++)
 			{
 				free(p[k]);
