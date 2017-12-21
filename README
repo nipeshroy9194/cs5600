@@ -10,3 +10,5 @@ Sr No.                             Name                                         
                      using sequential, select, epoll mechanism
   3.                 Implement malloc library                                         hw3
   4.                 Determine the approximate RAM of the system                      hw4
+  5.                 Measure the characteristics of Cache                             hw5
+  6.                 Distributed Key-Value Store                                      hw6
